@@ -1,0 +1,52 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+    -   id: check-yaml
+    -   id: check-added-large-files
+    -   id: end-of-file-fixer
+    -   id: fix-byte-order-marker
+    -   id: trailing-whitespace
+-   repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+    -   id: black
+        language: system
+        exclude: ^migrations/
+        args:
+        - --check
+-   repo: local
+    hooks:
+    -   id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        types: [python]
+        args: [
+          "-rn", # Only display messages
+          "-sn", # Don't display the score
+          "--rcfile=.pylintrc"
+        ]
+-   repo: https://github.com/thibaudcolas/pre-commit-stylelint
+    rev: v14.9.1
+    hooks:
+    -   id: stylelint
+        additional_dependencies:
+        # stylelint itself needs to be here when using additional_dependencies.
+        - stylelint@14.9.1
+        - stylelint-config-standard@26.0.0
+-   repo: https://github.com/pre-commit/mirrors-eslint
+    rev: 'v8.17.0'
+    hooks:
+    -   id: eslint
+        additional_dependencies:
+        # eslint itself needs to be here when using additional_dependencies.
+        -   eslint@8.17.0
+        -   eslint-config-standard@17.0.0
+        -   eslint-plugin-import@2.26.0
+        -   eslint-plugin-n@15.2.3
+        -   eslint-plugin-promise@6.0.0
+        -   '@babel/eslint-parser@7.18.2'
+        -   '@babel/plugin-syntax-import-assertions@7.17.12'

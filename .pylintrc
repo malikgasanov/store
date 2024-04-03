@@ -1,0 +1,20 @@
+[MAIN]
+load-plugins=pylint_django
+django-settings-module=store.settings
+
+[MASTER]
+ignore=migrations
+ignore-paths=.*/migrations
+
+[FORMAT]
+max-line-length=119
+good-names=pk,
+           no
+
+[MESSAGES CONTROL]
+disable=missing-module-docstring,
+        missing-class-docstring,
+        missing-function-docstring,
+        too-many-ancestors,
+        fixme,
+        abstract-method

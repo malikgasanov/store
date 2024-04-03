@@ -1,0 +1,69 @@
+version: '3.7'
+
+services:
+  db:
+    ports:
+      - "5432:5432"
+  web:
+    <<: &web
+      environment:
+        - DEBUG=True
+        - ALLOWED_HOSTS=*
+        - CSRF_TRUSTED_ORIGINS=http://api.store.localhost,https://api.store.localhost
+        - SECRET_KEY=uf5a^8%u&v*2srbffxh8%ty3kt=fc=b0js#vweu#mntr(zj4dw
+        - SITE_DOMAIN=api.store.localhost
+        - VIRTUAL_HOST=api.store.localhost
+        - PAYMENT_MEDIANN_TOKEN=<TOKEN>
+        - PAYMENT_MEDIANN_URL=http://test-payments.mediann-dev.ru/payment
+      volumes:
+        - .:/opt/store
+    ports:
+      - "8000:8000"
+    command: python manage.py runserver 0.0.0.0:8000
+    depends_on:
+      - nginx-proxy
+  queue-worker:
+    <<: *web
+    environment:
+      - DEBUG=False
+      - PAYMENT_MEDIANN_TOKEN=<TOKEN>
+      - PAYMENT_MEDIANN_URL=http://test-payments.mediann-dev.ru/payment
+    command: celery -A store worker -l info
+  queue-scheduler:
+    <<: *web
+    environment:
+      - DEBUG=False
+      - PAYMENT_MEDIANN_TOKEN=<TOKEN>
+      - PAYMENT_MEDIANN_URL=http://test-payments.mediann-dev.ru/payment
+    command: celery -A store beat -l info
+  flower:
+    image: mher/flower
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - VIRTUAL_HOST=flower.store.localhost
+  redis-commander:
+    image: rediscommander/redis-commander
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOSTS=redis
+      - VIRTUAL_HOST=redis.store.cron.localhost
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@mail.com
+      - PGADMIN_DEFAULT_PASSWORD=adminpassword
+      - VIRTUAL_HOST=pg.store.localhost
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+volumes:
+  pgadmin:
+  nginx-vhost:
+  node-modules:
